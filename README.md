@@ -18,33 +18,30 @@ Constructor method.
 
 Define a new grid. Will always be based on the current page dimensions - if you change the page size, redefine your grid.
 
-**Returns:** array of grid areas.
-
-```text
-[
-    'area name' => [
-        'x' => float,  // left edge
-        'y' => float,  // top edge
-        'x2' => float, // right edge
-        'y2' => float, // bottom edge
-        'w' => float,  // width
-        'h' => float,  // height
-    ],
-]
-```
-
 #### Parameters
 
-##### `$rows` / `$cols`
+<dl>
+<dt>
+
+`$rows` / `$cols`
+
+</dt>
+<dd>
 
 Row/column sizes. An array of values specified as:-
 
 - Floats or integers representing user units.
 - Strings representing a percentage (e.g. `'25%'`).
     - Calculated on the height/width of the page minus both the appropriate margins and the total of all row/column gaps (if row/column gaps are also a percentage, then these are calculated first).
-- A value of `0` (zero) indicating a flexible length (*fraction units*, `fr`, in CSS) to be automatically calculated from any remaing space.
+- A value of `0` (zero) indicating a flexible length (*fraction units*, `fr`, in CSS) to be automatically calculated from any remaining space.
 
-##### `$grid`
+</dd>
+<dt>
+
+`$grid`
+
+</dt>
+<dd>
 
 Grid area definition. An array of named areas, where each area (array key) is specified by an array of integers representing the edges of each area in the order: row start, column start, row end, column end.
 
@@ -70,7 +67,13 @@ S  3 +----+----+
 
 This means that an area that is 1 row high and 2 columns wide placed at the top of the grid would be defined by the array `'name' => [1, 1, 2, 3]` (see [Examples](#examples)).
 
-##### `$rGap` / `$cGap`
+</dd>
+<dt>
+
+`$rGap` / `$cGap`
+
+</dt>
+<dd>
 
 Row/column gaps. Values specified as:-
 
@@ -78,8 +81,28 @@ Row/column gaps. Values specified as:-
 - Strings representing a percentage (e.g. `'25%'`).
     - Calculated on the height/width of the page minus the appropriate margins.
 - A value of `0` (zero) indicating that there should be no gap.
- 
+
 **Default:** `0`.
+
+</dd>
+</dl>
+
+#### Returns
+
+Returns an array of grid areas with coordinates and dimensions calculated.
+
+```text
+[
+    'area name' => [
+        'x' => float,  // left edge
+        'y' => float,  // top edge
+        'x2' => float, // right edge
+        'y2' => float, // bottom edge
+        'w' => float,  // width
+        'h' => float,  // height
+    ],
+]
+```
 
 ## Examples
 
@@ -125,4 +148,4 @@ $pdf->grid(
 
 See the `demo` folder for a working demo.
 
-[^1] https://developer.mozilla.org/en-US/docs/Web/CSS/grid-area
+[^1]: https://developer.mozilla.org/en-US/docs/Web/CSS/grid-area

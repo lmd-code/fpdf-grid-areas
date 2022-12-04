@@ -15,7 +15,7 @@ namespace lmdcode\fpdfgridareas;
 /**
  * FPDF Grid Areas
  *
- * An extension to [FPDF](http://www.fpdf.org/).
+ * An extension to [FPDF Library](http://www.fpdf.org/).
  *
  * Define areas of a PDF page in a grid system using both fixed and flexible dimensions.
  */
