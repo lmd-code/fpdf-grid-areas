@@ -35,7 +35,7 @@ Define a new grid. Will always be based on the current page dimensions - if you 
 
 #### Parameters
 
-##### `$rows` / `$cols
+##### `$rows` / `$cols`
 
 Row/column sizes. An array of values specified as:-
 
