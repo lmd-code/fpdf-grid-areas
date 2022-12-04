@@ -5,7 +5,7 @@
  * (c) LMD, 2022
  * https://github.com/lmd-code/fpdf-grid-areas
  *
- * @version 0.1.0
+ * @version 0.2.0
  */
 
 declare(strict_types=1);
@@ -24,15 +24,15 @@ class FPDFGridAreas extends \FPDF
     /**
      * Calculate and return grid areas
      *
-     * @param array $rows Row sizes in user units or percentage
-     * @param array $cols Column sizes in user units or percentage
-     * @param array $grid Grid area definitions
-     * @param integer $rGap Row gap in user units (optional, default = 0)
-     * @param integer $cGap Column gap in user units (optional, default = 0)
+     * @param mixed[] $rows Row sizes in user units (int/float) or percentage (string)
+     * @param mixed[] $cols Column sizes in user units (int/float) or percentage (string)
+     * @param array<string, int[]> $grid Grid area definitions
+     * @param mixed $rGap Row gap in user units (int/float) or percentage (string)
+     * @param mixed $cGap Column gap in user units (int/float) or percentage (string)
      *
      * @return array
      */
-    public function grid(array $rows, array $cols, array $grid, float $rGap = 0, float $cGap = 0): array
+    public function grid(array $rows, array $cols, array $grid, mixed $rGap = 0, mixed $cGap = 0): array
     {
         $gridRows = $this->gridRows($rows, $rGap);
         $gridCols = $this->gridColumns($cols, $cGap);
@@ -71,18 +71,24 @@ class FPDFGridAreas extends \FPDF
     /**
      * Get grid row coordinates
      *
-     * @param array $sizes Row sizes in user units (int/float) or percentage (string)
-     * @param integer $gap Row gap in user units (default = 0)
+     * @param mixed[] $sizes Row sizes in user units (int/float) or percentage (string)
+     * @param float|int|string $gap Row gap in user units (int/float) or percentage (string)
      *
-     * @return array
+     * @return float[]
      */
-    protected function gridRows(array $sizes, float $gap = 0): array
+    protected function gridRows(array $sizes, float|int|string $gap = 0): array
     {
         $numRows = count($sizes);
         $pageHeight = ($this->h - ($this->tMargin + $this->bMargin));
-        $gapTotal = ($numRows > 1 && $gap > 0) ? ($numRows - 1) * $gap : 0;
 
-        $sizes = self::percentToFloat($sizes, $pageHeight - $gapTotal);
+        $gap = self::percentToFloat($gap, $pageHeight);
+
+        $gapTotal = ($numRows > 1) ? ($numRows - 1) * $gap : 0;
+
+        $contentHeight = $pageHeight - $gapTotal;
+        for ($i = 0; $i < $numRows; $i++) {
+            $sizes[$i] = self::percentToFloat($sizes[$i], $contentHeight);
+        }
 
         $numFlex = count(array_filter($sizes, fn($val) => intval($val) === 0));
         $definedHeight = array_sum($sizes);
@@ -91,7 +97,8 @@ class FPDFGridAreas extends \FPDF
         $rows = [];
         $y = $this->tMargin;
         for ($i = 0; $i < $numRows; $i++) {
-            $rowHeight = (intval($sizes[$i]) === 0) ? $flexHeight : $sizes[$i];
+            // can't compare floats accurately, so compare strings
+            $rowHeight = (strval($sizes[$i]) === '0') ? $flexHeight : $sizes[$i];
             $rows[$i] = ['y' => $y, 'y2' => $y + $rowHeight];
             $y = $y + $rowHeight + $gap;
         }
@@ -102,18 +109,24 @@ class FPDFGridAreas extends \FPDF
     /**
      * Get grid column coordinates
      *
-     * @param array $sizes Columns sizes in user units (int/float) or percentage (string)
-     * @param integer $gap Column gap in user units (default = 0)
+     * @param mixed[] $sizes Columns sizes in user units (int/float) or percentage (string)
+     * @param float|int|string $gap Column gap in user units (int/float) or percentage (string)
      *
-     * @return array
+     * @return float[]
      */
-    protected function gridColumns(array $sizes, float $gap = 0): array
+    protected function gridColumns(array $sizes, float|int|string $gap = 0): array
     {
         $numCols = count($sizes);
         $pageWidth = ($this->w - ($this->lMargin + $this->rMargin));
-        $gapTotal = ($numCols > 1 && $gap > 0) ? ($numCols - 1) * $gap : 0;
 
-        $sizes = self::percentToFloat($sizes, $pageWidth - $gapTotal);
+        $gap = self::percentToFloat($gap, $pageWidth);
+
+        $gapTotal = ($numCols > 1) ? ($numCols - 1) * $gap : 0;
+
+        $contentWidth = $pageWidth - $gapTotal;
+        for ($i = 0; $i < $numCols; $i++) {
+            $sizes[$i] = self::percentToFloat($sizes[$i], $contentWidth);
+        }
 
         $numFlex = count(array_filter($sizes, fn($val) => intval($val) === 0));
         $definedWidth = array_sum($sizes);
@@ -122,7 +135,7 @@ class FPDFGridAreas extends \FPDF
         $cols = [];
         $x = $this->lMargin;
         for ($i = 0; $i < $numCols; $i++) {
-            $rowWidth = (intval($sizes[$i]) === 0) ? $flexWidth : $sizes[$i];
+            $rowWidth = (strval($sizes[$i]) === '0') ? $flexWidth : $sizes[$i];
             $cols[$i] = ['x' => $x, 'x2' => $x + $rowWidth];
             $x = $x + $rowWidth + $gap;
         }
@@ -131,28 +144,33 @@ class FPDFGridAreas extends \FPDF
     }
 
     /**
-     * Convert percentages to floats
+     * Convert percentage to float
      *
-     * @param array $vals Values to convert
-     * @param float $total Total percentage is proportional to
+     * @param float|int|string $val Value to convert
+     * @param float|int $total Total value percentage is proportional to
      *
-     * @return array
+     * @return float
      */
-    private static function percentToFloat(array $vals, float $total): array
+    private static function percentToFloat(float|int|string $val, float|int $total): float
     {
-        $_vals = [];
-        foreach ($vals as $key => $val) {
-            $v = floatval($val); // get as float
-            if ($v < 0) {
-                throw new \InvalidArgumentException(__METHOD__ . ': Value must not be less than 0');
-            }
-            if (is_string($val) && strpos($val, '%') !== false && $v > 0) {
-                $_vals[$key] = $total / (100 / $v);
-            } else {
-                $_vals[$key] = $v; // already a float, do not convert
-            }
+        // If float or int, immediately return
+        if (is_int($val) || is_float($val)) {
+            return floatval($val); // force int to float
         }
 
-        return $_vals;
+        // Is value a vald percentage string (e.g., '50%', '100%' or '33.33%')
+        if (preg_match('/^\d{1,3}(\.\d+)?%$/', $val) !== 1) {
+            throw new \InvalidArgumentException(__METHOD__ . ': argument must be a valid percentage string. ' . $val);
+        }
+
+        $pc = floatval($val); // convert valid string to float
+
+        // Percentage must be between 0-100
+        if ($pc < 0 || $pc > 100) {
+            throw new \InvalidArgumentException(__METHOD__ . ': argument must be a value from 0 to 100 percent.');
+        }
+
+        // Everything is ok, do calculation
+        return  floatval(($pc / 100) * $total);
     }
 }
