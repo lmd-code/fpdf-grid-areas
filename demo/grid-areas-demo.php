@@ -33,7 +33,11 @@ $pdf->SetMargins(10, 10, 10);
 $pdf->SetAutoPageBreak(false, 10);
 $pdf->SetFont('Helvetica', '', 12);
 
-$pdf->AddPage();
+// Show grid lines (set to false, or remove entirely, to hide grid lines)
+// The grid lines will only show for the first page using each defined grid.
+$pdf->setShowGridLines(true);
+
+$pdf->AddPage(); // You must add a page before you can add a grid.
 
 // User user units (mm)
 $grid1 = $pdf->grid(
@@ -100,8 +104,9 @@ foreach ($grid2 as $key => $item) {
 
 $pdf->AddPage(); // Change back orientation
 
-// This time we are going to use our first grid again, but we dont' need to redeclare it.
+// This time we are going to use our first grid again, but we don't need to redeclare it.
 // The coordinates will always apply to the current page.
+// Also remember, the helper grid lines will not show this time.
 foreach ($grid1 as $key => $item) {
     $pdf->Rect($item['x'], $item['y'], $item['w'], $item['h']);
     $pdf->SetXY($item['x'], $item['y']);
