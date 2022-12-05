@@ -86,7 +86,7 @@ S  3 +----+----+
    4 +----+----+
 ```
 
-This means that an area that is 1 row high and 2 columns wide placed at the top of the grid would be defined by the array `'name' => [1, 1, 2, 3]` (see [Examples](#examples)).
+This means that an area that is 1 row high and 2 columns wide placed at the top of the grid would be defined by the array `'name' => [1, 1, 2, 3]` (see [Example](#example)).
 
 </dd>
 <dt>
