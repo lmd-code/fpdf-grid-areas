@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.3.1] - 2022-12-05
+
+### Fixed
+
+- Fixed bug where show grid lines (`setShowGridLines()`) did not account for row/column gaps when positioning items.
+
 ## [v0.3.0] - 2022-12-05
 
 ### Changed

@@ -5,7 +5,7 @@
  * (c) LMD, 2022
  * https://github.com/lmd-code/fpdf-grid-areas
  *
- * @version 0.3.0
+ * @version 0.3.1
  */
 
 declare(strict_types=1);
@@ -86,7 +86,7 @@ class FPDFGridAreas extends \FPDF
         }
 
         if ($this->showGridLines) {
-            $this->drawGridLines($gridRows, $gridCols);
+            $this->drawGridLines($gridRows, $gridCols, $rGap, $cGap);
         }
 
         return $gridItems;
@@ -172,10 +172,12 @@ class FPDFGridAreas extends \FPDF
      *
      * @param array $rows Row coordinates
      * @param array $cols Column coordinates
+     * @param float $rGap Row gap
+     * @param float $cGap Column gap
      *
      * @return void
      */
-    protected function drawGridLines(array $rows, array $cols): void
+    protected function drawGridLines(array $rows, array $cols, float $rGap, float $cGap): void
     {
         // Store current settings
         $current = [
@@ -202,20 +204,25 @@ class FPDFGridAreas extends \FPDF
         $fontHeight = $this->FontSize; // font size in user unit
         $fontWidth = ($this->CurrentFont['cw']['0'] * ($fontHeight / 1000)) * strlen('' . $numRows);
 
-        $fontYOffset = $fontHeight / 2;
-        $fontXOffset = $fontWidth / 2;
-        $edgeOffset = 1;
+        $fontYOffset = $fontHeight / 2; // vertial centre of text
+        $fontXOffset = $fontWidth / 2; // horizontal centre of text
+        $edgeOffset = 1; // offset text from edge of page (mm)
+
+        $rGapOffset = ($rGap > 0) ? $rGap / 2 : 0; // centre of row gap
+        $cGapOffset = ($cGap > 0) ? $cGap / 2 : 0; // centre of column gap
 
         // Draw rows
         foreach ($rows as $k => $row) {
-            $this->Line(0, $row['y'], $this->w, $row['y']);
+            $yPos = $row['y'] - ($k > 0 ? $rGapOffset : 0); // no offset on top edge line
+
+            $this->Line(0, $yPos, $this->w, $yPos);
 
             // Left edge
-            $this->SetXY($edgeOffset, $row['y'] - $fontYOffset);
+            $this->SetXY($edgeOffset, $yPos - $fontYOffset);
             $this->Cell($fontWidth, $fontHeight, $k + 1, 0, 0, 'C', true);
 
             // Right edge
-            $this->SetXY($this->w - ($fontWidth + $edgeOffset), $row['y'] - $fontYOffset);
+            $this->SetXY($this->w - ($fontWidth + $edgeOffset), $yPos - $fontYOffset);
             $this->Cell($fontWidth, $fontHeight, $k + 1, 0, 0, 'C', true);
 
             // Bottom line on last row
@@ -234,14 +241,16 @@ class FPDFGridAreas extends \FPDF
 
         // Draw columns
         foreach ($cols as $k => $col) {
-            $this->Line($col['x'], 0, $col['x'], $this->h);
+            $xPos = $col['x'] - ($k > 0 ? $cGapOffset : 0); // no offset on left edge line
+
+            $this->Line($xPos, 0, $xPos, $this->h);
 
             // Top edge
-            $this->SetXY($col['x'] - $fontXOffset, $edgeOffset);
+            $this->SetXY($xPos - $fontXOffset, $edgeOffset);
             $this->Cell($fontWidth, $fontHeight, $k + 1, 0, 0, 'C', true);
 
             // Bottom edge
-            $this->SetXY($col['x'] - $fontXOffset, $this->h - ($fontHeight + $edgeOffset));
+            $this->SetXY($xPos - $fontXOffset, $this->h - ($fontHeight + $edgeOffset));
             $this->Cell($fontWidth, $fontHeight, $k + 1, 0, 0, 'C', true);
 
             // Right edge line on last column
