@@ -5,7 +5,7 @@
  * (c) LMD, 2022
  * https://github.com/lmd-code/fpdf-grid-areas
  *
- * @version 0.2.0
+ * @version 0.3.0
  */
 
 declare(strict_types=1);
@@ -30,7 +30,7 @@ class FPDFGridAreas extends \FPDF
     /**
      * Show grid lines during development.
      *
-     * Gridlines will only show on the first page using each defined grid.
+     * Grid lines will only show on the first page using each defined grid.
      *
      * @param boolean $flag Show grid lines (true = yes, false = no)
      *

@@ -14,6 +14,27 @@ Constructor method.
 
 *See FPDF Library constructor method.*
 
+### `setShowGridLines(bool $flag)`
+
+Show grid lines during development. Grid lines will only show on the first page using each defined grid.
+
+#### Parameters
+
+<dl>
+<dt>
+
+`$flag`
+
+</dt>
+<dd>
+
+Show grid lines: `true` = yes, `false` = no.
+
+**Default:** `false`.
+
+</dd>
+</dl>
+
 ### `grid(array $rows, array $cols, array $grid[, mixed $rGap[, mixed $cGap]])`
 
 Define a new grid. Will always be based on the current page dimensions - if you change the page size, redefine your grid.
@@ -80,6 +101,7 @@ Row/column gaps. Values specified as:-
 - Floats or integers representing user units.
 - Strings representing a percentage (e.g. `'25%'`).
     - Calculated on the height/width of the page minus the appropriate margins.
+    - **Remember:** Row/column gaps with the same proportion (eg. `'1%'`), will not be equal in user unit size when the page height and width (inc. different margins) are not equal. If you want row/column gaps to be equal, use user units.
 - A value of `0` (zero) indicating that there should be no gap.
 
 **Default:** `0`.
@@ -104,9 +126,7 @@ Returns an array of grid areas with coordinates and dimensions calculated.
 ]
 ```
 
-## Examples
-
-### Using User Units
+## Example
 
 ```php
 // Setup page
@@ -114,7 +134,9 @@ $pdf = new \lmdcode\fpdfgridareas\FPDFGridAreas('P', 'mm', 'A4');
 $pdf->SetMargins(10, 10, 10);
 $pdf->SetAutoPageBreak(false, 10);
 
-// Define grid
+$pdf->AddPage(); // You must add a page before you can add a grid.
+
+// Define grid using User Units
 $pdf->grid(
     [20, 0, 10], // grid-template-rows: 20mm 1fr 10mm;
     [0, 50], // grid-template-columns: 1fr 50mm;
@@ -127,11 +149,10 @@ $pdf->grid(
     5, // grid-row-gap: 5mm;
     5 // grid-column-gap: 5mm;
 );
-```
 
-### Using Percentages
+$pdf->AddPage(); // New page
 
-```php
+// Define a grid using percentages
 $pdf->grid(
     ['10%', 0, '5%'],
     [0, '25%'],
