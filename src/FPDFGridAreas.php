@@ -5,7 +5,7 @@
  * (c) LMD, 2022
  * https://github.com/lmd-code/fpdf-grid-areas
  *
- * @version 0.3.1
+ * @version 0.3.2
  */
 
 declare(strict_types=1);
@@ -54,6 +54,12 @@ class FPDFGridAreas extends \FPDF
      */
     public function grid(array $rows, array $cols, array $grid, mixed $rGap = 0, mixed $cGap = 0): array
     {
+        $pageHeight = ($this->h - ($this->tMargin + $this->bMargin));
+        $pageWidth = ($this->w - ($this->lMargin + $this->rMargin));
+
+        $rGap = self::percentToFloat($rGap, $pageHeight);
+        $cGap = self::percentToFloat($cGap, $pageWidth);
+
         $gridRows = $this->gridRows($rows, $rGap);
         $gridCols = $this->gridColumns($cols, $cGap);
 
@@ -96,16 +102,14 @@ class FPDFGridAreas extends \FPDF
      * Get grid row coordinates
      *
      * @param mixed[] $sizes Row sizes in user units (int/float) or percentage (string)
-     * @param float|int|string $gap Row gap in user units (int/float) or percentage (string)
+     * @param float|int|string $gap Row gap in user units
      *
      * @return float[]
      */
-    protected function gridRows(array $sizes, float|int|string $gap = 0): array
+    protected function gridRows(array $sizes, float $gap = 0): array
     {
         $numRows = count($sizes);
         $pageHeight = ($this->h - ($this->tMargin + $this->bMargin));
-
-        $gap = self::percentToFloat($gap, $pageHeight);
 
         $gapTotal = ($numRows > 1) ? ($numRows - 1) * $gap : 0;
 
@@ -134,16 +138,14 @@ class FPDFGridAreas extends \FPDF
      * Get grid column coordinates
      *
      * @param mixed[] $sizes Columns sizes in user units (int/float) or percentage (string)
-     * @param float|int|string $gap Column gap in user units (int/float) or percentage (string)
+     * @param float $gap Column gap in user units
      *
      * @return float[]
      */
-    protected function gridColumns(array $sizes, float|int|string $gap = 0): array
+    protected function gridColumns(array $sizes, float $gap = 0): array
     {
         $numCols = count($sizes);
         $pageWidth = ($this->w - ($this->lMargin + $this->rMargin));
-
-        $gap = self::percentToFloat($gap, $pageWidth);
 
         $gapTotal = ($numCols > 1) ? ($numCols - 1) * $gap : 0;
 

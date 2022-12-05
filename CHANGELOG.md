@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.3.2] - 2022-12-05
+
+### Fixed
+
+- Fixed bug where `$rGap` and `$cGap` in `grid()` weren't being converted to floats soon enough.
+
 ## [v0.3.1] - 2022-12-05
 
 ### Fixed
@@ -34,6 +40,7 @@
 
 First working version.
 
+[v0.3.2]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v0.3.2
 [v0.3.1]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v0.3.1
 [v0.3.0]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v0.3.0
 [v0.2.0]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v0.2.0
