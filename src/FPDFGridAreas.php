@@ -22,6 +22,26 @@ namespace lmdcode\fpdfgridareas;
 class FPDFGridAreas extends \FPDF
 {
     /**
+     * Show grid lines flag
+     * @var boolean
+     */
+    private $showGridLines = false;
+
+    /**
+     * Show grid lines during development.
+     *
+     * Gridlines will only show on the first page using each defined grid.
+     *
+     * @param boolean $flag Show grid lines (true = yes, false = no)
+     *
+     * @return void
+     */
+    public function setShowGridLines(bool $flag): void
+    {
+        $this->showGridLines = $flag;
+    }
+
+    /**
      * Calculate and return grid areas
      *
      * @param mixed[] $rows Row sizes in user units (int/float) or percentage (string)
@@ -63,6 +83,10 @@ class FPDFGridAreas extends \FPDF
                 'w' => $w,
                 'h' => $h,
             ];
+        }
+
+        if ($this->showGridLines) {
+            $this->drawGridLines($gridRows, $gridCols);
         }
 
         return $gridItems;
@@ -141,6 +165,108 @@ class FPDFGridAreas extends \FPDF
         }
 
         return $cols;
+    }
+
+    /**
+     * Draw grid lines if flag is set to true
+     *
+     * @param array $rows Row coordinates
+     * @param array $cols Column coordinates
+     *
+     * @return void
+     */
+    protected function drawGridLines(array $rows, array $cols): void
+    {
+        // Store current settings
+        $current = [
+            'fontFamily' => $this->FontFamily,
+            'fontStyle' => $this->FontStyle,
+            'fontSize' => $this->FontSizePt,
+            'lineWidth' => $this->LineWidth,
+            'drawColor' => $this->DrawColor,
+            'fillColor' => $this->FillColor,
+        ];
+
+        $fontSize = 10; // for axis line numbers
+
+        // Set temporary settings
+        $this->SetFont('Courier', '', $fontSize);
+        $this->SetDrawColor(255, 0, 0);
+        $this->SetFillColor(255, 255, 255);
+        $this->SetLineWidth(0.1);
+
+        $numRows = count($rows);
+        $numCols = count($cols);
+
+        // Font sizes - fixed width font, all chars the same
+        $fontHeight = $this->FontSize; // font size in user unit
+        $fontWidth = ($this->CurrentFont['cw']['0'] * ($fontHeight / 1000)) * strlen('' . $numRows);
+
+        $fontYOffset = $fontHeight / 2;
+        $fontXOffset = $fontWidth / 2;
+        $edgeOffset = 1;
+
+        // Draw rows
+        foreach ($rows as $k => $row) {
+            $this->Line(0, $row['y'], $this->w, $row['y']);
+
+            // Left edge
+            $this->SetXY($edgeOffset, $row['y'] - $fontYOffset);
+            $this->Cell($fontWidth, $fontHeight, $k + 1, 0, 0, 'C', true);
+
+            // Right edge
+            $this->SetXY($this->w - ($fontWidth + $edgeOffset), $row['y'] - $fontYOffset);
+            $this->Cell($fontWidth, $fontHeight, $k + 1, 0, 0, 'C', true);
+
+            // Bottom line on last row
+            if (($k + 1) === $numRows) {
+                $this->Line(0, $row['y2'], $this->w, $row['y2']);
+
+                // Left edge
+                $this->SetXY($edgeOffset, $row['y2'] - $fontYOffset);
+                $this->Cell($fontWidth, $fontHeight, $k + 2, 0, 0, 'C', true);
+
+                // Right edge
+                $this->SetXY($this->w - ($fontWidth + $edgeOffset), $row['y2'] - $fontYOffset);
+                $this->Cell($fontWidth, $fontHeight, $k + 2, 0, 0, 'C', true);
+            }
+        }
+
+        // Draw columns
+        foreach ($cols as $k => $col) {
+            $this->Line($col['x'], 0, $col['x'], $this->h);
+
+            // Top edge
+            $this->SetXY($col['x'] - $fontXOffset, $edgeOffset);
+            $this->Cell($fontWidth, $fontHeight, $k + 1, 0, 0, 'C', true);
+
+            // Bottom edge
+            $this->SetXY($col['x'] - $fontXOffset, $this->h - ($fontHeight + $edgeOffset));
+            $this->Cell($fontWidth, $fontHeight, $k + 1, 0, 0, 'C', true);
+
+            // Right edge line on last column
+            if (($k + 1) === $numCols) {
+                $this->Line($col['x2'], 0, $col['x2'], $this->h);
+
+                // Top edge
+                $this->SetXY($col['x2'] - $fontXOffset, $edgeOffset);
+                $this->Cell($fontWidth, $fontHeight, $k + 2, 0, 0, 'C', true);
+
+                // Bottom edge
+                $this->SetXY($col['x2'] - $fontXOffset, $this->h - ($fontHeight + $edgeOffset));
+                $this->Cell($fontWidth, $fontHeight, ($k + 2), 0, 0, 'C', true);
+            }
+        }
+
+        // Reset current settings
+        $this->SetFont($current['fontFamily'], $current['fontStyle'], $current['fontSize']);
+        $this->SetLineWidth($current['lineWidth']);
+        $this->DrawColor = $current['drawColor'];
+        $this->FillColor = $current['fillColor'];
+        if ($this->page > 0) {
+            $this->_out($current['drawColor']); // output current draw colour
+            $this->_out($current['fillColor']); // output current fill colour
+        }
     }
 
     /**
