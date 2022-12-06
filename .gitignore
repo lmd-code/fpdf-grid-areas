@@ -2,5 +2,6 @@
 .github
 /dev
 /vendor
+/src/*.txt
 *.log
 *.tmp
