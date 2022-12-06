@@ -68,15 +68,6 @@ Grid area definition.
 
 An array of named areas, where each area (array key) is specified by an array of integers representing the edges of each area in the order: row start, column start, row end, column end. See [Defining a Grid](#defining-a-grid) for more detail.
 
-```php
-// 'area name' => [row start, column start, row end, column end],
-$grid = [
-    'area1' => [1, 1, 2, 2],
-    'area2' => [2, 1, 3, 2],
-    //... etc
-]
-```
-
 You can pass an empty array (`$grid = []`) in conjunction with `setShowGridLines()` to view the lines numbers (see [Show Grid Lines Helper](#show-grid-lines-helper)).
 
 </dd>
@@ -134,6 +125,15 @@ S  3 +----+----+
 ```
 
 This means that an area that is 1 row high and 2 columns wide placed at the top of the grid would be defined by the array `'areaName' => [1, 1, 2, 3]` (in CSS it's `#areaName { grid-area: 1 / 1 / 2 / 3; }`).
+
+```php
+// 'area name' => [row start, column start, row end, column end],
+$grid = [
+    'area1' => [1, 1, 2, 2],
+    'area2' => [2, 1, 3, 2],
+    //... etc
+]
+```
 
 ### Show Grid Lines Helper
 
