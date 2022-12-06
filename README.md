@@ -64,29 +64,20 @@ Row/column sizes. An array of values specified as:-
 </dt>
 <dd>
 
-Grid area definition. An array of named areas, where each area (array key) is specified by an array of integers representing the edges of each area in the order: row start, column start, row end, column end.
+Grid area definition.
 
-```text
-[
-    'area name' => [row start, column start, row end, column end],
+An array of named areas, where each area (array key) is specified by an array of integers representing the edges of each area in the order: row start, column start, row end, column end. See [Defining a Grid](#defining-a-grid) for more detail.
+
+```php
+// 'area name' => [row start, column start, row end, column end],
+$grid = [
+    'area1' => [1, 1, 2, 2],
+    'area2' => [2, 1, 3, 2],
+    //... etc
 ]
 ```
 
-The syntax is borrowed from CSS grid (specifically the `grid-area` property[^1]), and therefore uses the same axis numbering system. For example, in a 3 (row) by 2 (column) grid there are 4 horizontal and 3 vertical axis numbered 1-3 and 1-4 respectively. When defining a grid area the row/column start/end positions refer to the axis.
-
-```text
-       COLUMNS
-     1    2    3
-   1 +----+----+
-R    |    |    |
-O  2 +----+----+
-W    |    |    |
-S  3 +----+----+
-     |    |    |
-   4 +----+----+
-```
-
-This means that an area that is 1 row high and 2 columns wide placed at the top of the grid would be defined by the array `'name' => [1, 1, 2, 3]` (see [Example](#example)).
+You can pass an empty array (`$grid = []`) in conjunction with `setShowGridLines()` to view the lines numbers (see [Show Grid Lines Helper](#show-grid-lines-helper)).
 
 </dd>
 <dt>
@@ -124,6 +115,33 @@ Returns an array of grid areas with coordinates and dimensions calculated.
         'h' => float,  // height
     ],
 ]
+```
+
+## Defining a Grid
+
+The grid syntax is borrowed from CSS grid (specifically the `grid-area` property[^1]), and therefore uses the same axis numbering system. For example, in a 3 (row) by 2 (column) grid there are 4 horizontal and 3 vertical axis numbered 1-3 and 1-4 respectively. When defining a grid area the row/column start/end positions refer to the axis.
+
+```text
+       COLUMNS
+     1    2    3
+   1 +----+----+
+R    |    |    |
+O  2 +----+----+
+W    |    |    |
+S  3 +----+----+
+     |    |    |
+   4 +----+----+
+```
+
+This means that an area that is 1 row high and 2 columns wide placed at the top of the grid would be defined by the array `'areaName' => [1, 1, 2, 3]` (in CSS it's `#areaName { grid-area: 1 / 1 / 2 / 3; }`).
+
+### Show  Grid Lines Helper
+
+An easy way to visualise the row/column axis required, is to set `setShowGridLines(true)` and pass an empty array to the `$grid` argument of the `grid()` method. You can then work out each area's row/column start/end axis.
+
+```php
+$pdf->setShowGridLines(true);
+$pdf->grid([20, 0, 10], [0, 50], [], 5, 5);
 ```
 
 ## Example
