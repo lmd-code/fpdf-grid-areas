@@ -135,7 +135,7 @@ S  3 +----+----+
 
 This means that an area that is 1 row high and 2 columns wide placed at the top of the grid would be defined by the array `'areaName' => [1, 1, 2, 3]` (in CSS it's `#areaName { grid-area: 1 / 1 / 2 / 3; }`).
 
-### Show  Grid Lines Helper
+### Show Grid Lines Helper
 
 An easy way to visualise the row/column axis required, is to set `setShowGridLines(true)` and pass an empty array to the `$grid` argument of the `grid()` method. You can then work out each area's row/column start/end axis.
 
