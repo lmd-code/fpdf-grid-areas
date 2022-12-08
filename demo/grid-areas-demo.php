@@ -18,20 +18,71 @@ $content = [
     // page no.
     1 => [
         // grid area name
-        'area2' => "This is the content for this page!"
+        'area1' => [
+            'text' => "Some Sort of Heading...",
+            'font' => ['Helvetica', 'B', 20],
+            'align' => 'C',
+        ],
+        'area2' => [
+            'text' => "This is the main content for this page.",
+            'font' => ['Helvetica', '', 10],
+            'align' => 'L',
+        ],
+        'area3' => [
+            'text' => "- Item A\n- Item B\n- Item C",
+            'font' => ['Helvetica', '', 10],
+            'align' => 'L',
+        ],
     ],
     2 => [
-        'area2' => "Same area name, different page, different layout."
+        'area1' => [
+            'text' => "Another Heading",
+            'font' => ['Helvetica', 'B', 20],
+            'align' => 'C',
+        ],
+        'area2' => [
+            'text' => "Same area name, different page, different layout.",
+            'font' => ['Helvetica', '', 10],
+            'align' => 'L',
+        ],
+        'area3' => [
+            'text' => "No sit lorem aliquyam erat diam, lorem no dolor stet voluptua dolor sed tempor eirmod sed, sadipscing vero lorem sadipscing amet no. Dolor sed tempor clita elitr justo. Lorem et lorem dolores sit sit consetetur sea, nonumy et dolor sea lorem. Accusam duo gubergren voluptua sadipscing dolor amet. Duo erat et gubergren et duo sadipscing. Magna sit diam erat amet sit, est et gubergren diam amet ut sadipscing. Dolor diam invidunt dolor accusam justo eos justo kasd no. Tempor kasd eirmod ut sadipscing eirmod elitr diam. Sadipscing accusam lorem eos dolor, dolores amet accusam amet diam rebum et duo sed.",
+            'font' => ['Helvetica', '', 10],
+            'align' => 'L',
+        ],
+        'area4' => [
+            'text' => "Page Footer... blah blah blah",
+            'font' => ['Helvetica', '', 10],
+            'align' => 'C',
+        ],
     ],
     3 => [
-        'area2' => "Same area name, different page, same layout as first page."
+        'area1' => [
+            'text' => "Guess what? A heading!",
+            'font' => ['Helvetica', 'B', 20],
+            'align' => 'C',
+        ],
+        'area2' => [
+            'text' => "Same area name, different page, same layout as first page.",
+            'font' => ['Helvetica', '', 10],
+            'align' => 'L',
+        ],
+        'area3' => [
+            'text' => "Some more sidebar content.",
+            'font' => ['Helvetica', '', 10],
+            'align' => 'L',
+        ],
+        'area4' => [
+            'text' => "A different page footer",
+            'font' => ['Helvetica', '', 10],
+            'align' => 'C',
+        ],
     ],
 ];
 
 $pdf = new FPDFGridAreas('P', 'mm', 'A4');
 $pdf->SetMargins(10, 10, 10);
 $pdf->SetAutoPageBreak(false, 10);
-$pdf->SetFont('Helvetica', '', 12);
 
 // Show grid lines (set to false, or remove entirely, to hide grid lines)
 // The grid lines will only show for the first page using each defined grid.
@@ -40,7 +91,7 @@ $pdf->setShowGridLines(true);
 $pdf->AddPage(); // You must add a page before you can add a grid.
 
 // User user units (mm)
-$grid1 = $pdf->grid(
+$grid1 = $pdf->setGrid(
     [20, 0, 10],
     [0, 50],
     [
@@ -53,27 +104,31 @@ $grid1 = $pdf->grid(
     5
 );
 
-// To show the areas, we'll draw some rectangles and add text labels
-foreach ($grid1 as $key => $item) {
-    $pdf->Rect($item['x'], $item['y'], $item['w'], $item['h']);
-    $pdf->SetXY($item['x'], $item['y']);
-    $pdf->Write(5, $key);
-    if (!empty($content[$pdf->PageNo()][$key])) {
-        $pdf->SetXY($item['x'] + 2.5, $item['y'] + 7.5);
-        $pdf->MultiCell(
-            $item['w'] - 5,
-            5,
-            $content[$pdf->PageNo()][$key], // use the page number to get the right content
-            0,
-            'L'
-        );
-    }
+// Show the content by looping through the content array for the current page number
+foreach ($content[$pdf->PageNo()] as $gridKey => $gridContent) {
+    $area = $grid1[$gridKey];
+
+    $pdf->SetXY($area['x'] + 1, $area['y'] + 4);
+
+    $pdf->SetFont($gridContent['font'][0], $gridContent['font'][1], $gridContent['font'][2]);
+    $pdf->MultiCell($area['w'] - 2, 5, $gridContent['text'], 0, $gridContent['align']);
 }
+
+// We can also directly reference a grid area
+$pdf->SetXY($grid1['area4']['x'], $grid1['area4']['y']);
+$pdf->Cell(
+    $grid1['area4']['w'],
+    $grid1['area4']['h'],
+    "This is a directly referenced grid area!",
+    0,
+    0,
+    'C'
+);
 
 $pdf->AddPage('L'); // Change in orientation
 
 // Using percentages
-$grid2 = $pdf->grid(
+$grid2 = $pdf->setGrid(
     ['10%', 0, '10%'],
     ['30%', 0],
     [
@@ -86,52 +141,27 @@ $grid2 = $pdf->grid(
     '1%'
 );
 
-foreach ($grid2 as $key => $item) {
-    $pdf->Rect($item['x'], $item['y'], $item['w'], $item['h']);
-    $pdf->SetXY($item['x'], $item['y']);
-    $pdf->Write(5, $key);
-    if (!empty($content[$pdf->PageNo()][$key])) {
-        $pdf->SetXY($item['x'] + 2.5, $item['y'] + 7.5);
-        $pdf->MultiCell(
-            $item['w'] - 5,
-            5,
-            $content[$pdf->PageNo()][$key],
-            0,
-            'L'
-        );
-    }
+foreach ($content[$pdf->PageNo()] as $gridKey => $gridContent) {
+    $area = $grid2[$gridKey];
+
+    $pdf->SetXY($area['x'] + 1, $area['y'] + 4);
+
+    $pdf->SetFont($gridContent['font'][0], $gridContent['font'][1], $gridContent['font'][2]);
+    $pdf->MultiCell($area['w'] - 2, 5, $gridContent['text'], 0, $gridContent['align']);
 }
 
 $pdf->AddPage(); // Change back orientation
 
-// This time we are going to use our first grid again, but we don't need to redeclare it.
-// The coordinates will always apply to the current page.
+// This time we are going to use our first grid again, but we don't need to
+// redeclare it, the coordinates will always apply to the current page.
 // Also remember, the helper grid lines will not show this time.
-foreach ($grid1 as $key => $item) {
-    $pdf->Rect($item['x'], $item['y'], $item['w'], $item['h']);
-    $pdf->SetXY($item['x'], $item['y']);
-    $pdf->Write(5, $key);
-    if (!empty($content[$pdf->PageNo()][$key])) {
-        $pdf->SetXY($item['x'] + 2.5, $item['y'] + 7.5);
-        $pdf->MultiCell(
-            $item['w'] - 5,
-            5,
-            $content[$pdf->PageNo()][$key],
-            0,
-            'L'
-        );
-    }
-}
+foreach ($content[$pdf->PageNo()] as $gridKey => $gridContent) {
+    $area = $grid1[$gridKey];
 
-// We can directly reference a grid area without having to loop through it.
-$pdf->SetXY($grid1['area4']['x'], $grid1['area4']['y']);
-$pdf->Cell(
-    $grid1['area4']['w'],
-    $grid1['area4']['h'],
-    "This is a directly referenced grid area!",
-    0,
-    0,
-    'C'
-);
+    $pdf->SetXY($area['x'] + 1, $area['y'] + 4);
+
+    $pdf->SetFont($gridContent['font'][0], $gridContent['font'][1], $gridContent['font'][2]);
+    $pdf->MultiCell($area['w'] - 2, 5, $gridContent['text'], 0, $gridContent['align']);
+}
 
 $pdf->Output();
