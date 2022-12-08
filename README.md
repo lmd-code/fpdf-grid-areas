@@ -35,7 +35,7 @@ Show grid lines: `true` = yes, `false` = no.
 </dd>
 </dl>
 
-### `grid(array $rows, array $cols, array $grid[, mixed $rGap[, mixed $cGap]])`
+### `setGrid(array $rows, array $cols, array $grid[, mixed $gap])`
 
 Define a new grid. Will always be based on the current page dimensions - if you change the page size, redefine your grid.
 
@@ -73,18 +73,21 @@ You can pass an empty array (`$grid = []`) in conjunction with `setShowGridLines
 </dd>
 <dt>
 
-`$rGap` / `$cGap`
+`$gap`
 
 </dt>
 <dd>
 
-Row/column gaps. Values specified as:-
+Row/column gaps can be specified as:-
 
-- Floats or integers representing user units.
-- Strings representing a percentage (e.g. `'25%'`).
-    - Calculated on the height/width of the page minus the appropriate margins.
-    - **Remember:** Row/column gaps with the same proportion (eg. `'1%'`), will not be equal in user unit size when the page height and width (inc. different margins) are not equal. If you want row/column gaps to be equal, use user units.
-- A value of `0` (zero) indicating that there should be no gap.
+- A single integer, float or string applying the same value to both the row and column gap.
+    - Floats or integers represent user units.
+    - Strings represent a percentage (e.g. `'25%'`).
+    - A value of `0` (zero) indicates that there should be no gap.
+- An array of integers, floats or strings (e.g., `[5, 10]`) applies different gap values in the order "row, column".
+    - Note: an array with a single value will apply to the row gap only, the column gap will be `0` (zero).
+
+**Remember:** Percentages are calculated on the height/width of the page minus the appropriate margins. When using the same percentage for row and column gaps, the result will not be equal in user unit size when the page height and width (including different margin sizes) are not equal. If you want row/column gaps to be equal, use user units.
 
 **Default:** `0`.
 
@@ -137,11 +140,11 @@ $grid = [
 
 ### Show Grid Lines Helper
 
-An easy way to visualise the row/column axis required, is to set `setShowGridLines(true)` and pass an empty array to the `$grid` argument of the `grid()` method. You can then work out each area's row/column start/end axis.
+An easy way to visualise the row/column axis required, is to set `setShowGridLines(true)` and pass an empty array to the `$grid` argument of the `setGrid()` method. You can then work out each area's row/column start/end axis.
 
 ```php
 $pdf->setShowGridLines(true);
-$pdf->grid([20, 0, 10], [0, 50], [], 5, 5);
+$pdf->setGrid([20, 0, 10], [0, 50], [], 5); // note empty $grid argument
 ```
 
 ## Example
@@ -155,7 +158,7 @@ $pdf->SetAutoPageBreak(false, 10);
 $pdf->AddPage(); // You must add a page before you can add a grid.
 
 // Define grid using User Units
-$pdf->grid(
+$pdf->setGrid(
     [20, 0, 10], // grid-template-rows: 20mm 1fr 10mm;
     [0, 50], // grid-template-columns: 1fr 50mm;
     [ // named grid areas
@@ -164,14 +167,13 @@ $pdf->grid(
         'area3' => [2, 2, 3, 3],
         'area4' => [3, 1, 4, 3],
     ],
-    5, // grid-row-gap: 5mm;
-    5 // grid-column-gap: 5mm;
+    [5, 10], // grid-row-gap: 5mm; /  grid-column-gap: 10mm;
 );
 
 $pdf->AddPage(); // New page
 
 // Define a grid using percentages
-$pdf->grid(
+$pdf->setGrid(
     ['10%', 0, '5%'],
     [0, '25%'],
     [
@@ -180,7 +182,6 @@ $pdf->grid(
         'area3' => [2, 2, 3, 3],
         'area4' => [3, 1, 4, 3],
     ],
-    '1%',
     '1%'
 );
 ```

@@ -28,6 +28,12 @@ class FPDFGridAreas extends \FPDF
     private $showGridLines = false;
 
     /**
+     * Used alpha transparencies
+     * @var array
+     */
+    private $alphaTransparency = [];
+
+    /**
      * Show grid lines during development.
      *
      * Grid lines will only show on the first page using each defined grid.
@@ -46,19 +52,27 @@ class FPDFGridAreas extends \FPDF
      *
      * @param mixed[] $rows Row sizes in user units (int/float) or percentage (string)
      * @param mixed[] $cols Column sizes in user units (int/float) or percentage (string)
-     * @param array<string, int[]> $grid Grid area definitions
-     * @param mixed $rGap Row gap in user units (int/float) or percentage (string)
-     * @param mixed $cGap Column gap in user units (int/float) or percentage (string)
+     * @param array<string, int[]> $grid Array of grid area definitions in the format:
+     *                                   `'name' => 'row start, col start, row end, col end',`
+     *                                   E.g., `'area1' => [1, 1, 2, 3],`
+     * @param mixed $gap Row/Column gap in user units (int/float) or percentage (string).
+     *                   - Single value (int/float/atring) for equal row/column gaps (`5`)
+     *                   - An array of values (as above) for different row/column gaps (`[5, 10]`)
      *
      * @return array
      */
-    public function grid(array $rows, array $cols, array $grid, mixed $rGap = 0, mixed $cGap = 0): array
+    public function setGrid(array $rows, array $cols, array $grid, mixed $gap = 0): array
     {
         $pageHeight = ($this->h - ($this->tMargin + $this->bMargin));
         $pageWidth = ($this->w - ($this->lMargin + $this->rMargin));
 
-        $rGap = self::percentToFloat($rGap, $pageHeight);
-        $cGap = self::percentToFloat($cGap, $pageWidth);
+        if (is_array($gap)) {
+            $rGap = self::percentToFloat(isset($gap[0]) ? $gap[0] : 0, $pageHeight);
+            $cGap = self::percentToFloat(isset($gap[1]) ? $gap[1] : 0, $pageWidth);
+        } else {
+            $rGap = self::percentToFloat($gap, $pageHeight);
+            $cGap = self::percentToFloat($gap, $pageWidth);
+        }
 
         $gridRows = $this->gridRows($rows, $rGap);
         $gridCols = $this->gridColumns($cols, $cGap);
@@ -92,7 +106,7 @@ class FPDFGridAreas extends \FPDF
         }
 
         if ($this->showGridLines) {
-            $this->drawGridLines($gridRows, $gridCols, $rGap, $cGap);
+            $this->drawGridLines($gridRows, $gridCols, $rGap, $cGap, $gridItems);
         }
 
         return $gridItems;
@@ -176,28 +190,32 @@ class FPDFGridAreas extends \FPDF
      * @param array $cols Column coordinates
      * @param float $rGap Row gap
      * @param float $cGap Column gap
+     * @param array $grid Grid area definitions (optional)
      *
      * @return void
      */
-    protected function drawGridLines(array $rows, array $cols, float $rGap, float $cGap): void
+    protected function drawGridLines(array $rows, array $cols, float $rGap, float $cGap, array $grid = []): void
     {
         // Store current settings
         $current = [
             'fontFamily' => $this->FontFamily,
             'fontStyle' => $this->FontStyle,
             'fontSize' => $this->FontSizePt,
+            'textColor' => $this->TextColor,
             'lineWidth' => $this->LineWidth,
             'drawColor' => $this->DrawColor,
             'fillColor' => $this->FillColor,
+            'cMargin' => $this->cMargin,
         ];
 
         $fontSize = 10; // for axis line numbers
 
         // Set temporary settings
-        $this->SetFont('Courier', '', $fontSize);
+        $this->SetFont('Courier', 'B', $fontSize);
+        $this->SetTextColor(100, 100, 100);
         $this->SetDrawColor(255, 0, 0);
-        $this->SetFillColor(255, 255, 255);
         $this->SetLineWidth(0.1);
+        $this->cMargin = 0;
 
         $numRows = count($rows);
         $numCols = count($cols);
@@ -212,6 +230,34 @@ class FPDFGridAreas extends \FPDF
 
         $rGapOffset = ($rGap > 0) ? $rGap / 2 : 0; // centre of row gap
         $cGapOffset = ($cGap > 0) ? $cGap / 2 : 0; // centre of column gap
+
+        // Draw row/col gap rectangles
+        $this->SetFillColor(208, 208, 208);
+        foreach ($rows as $k => $row) {
+            if ($k > 0) {
+                $this->Rect(
+                    $this->lMargin,
+                    $row['y'] - $rGap,
+                    $this->w - ($this->lMargin + $this->rMargin),
+                    $rGap,
+                    'F'
+                );
+            }
+        }
+        foreach ($cols as $k => $col) {
+            if ($k > 0) {
+                $this->Rect(
+                    $col['x'] - $cGap,
+                    $this->tMargin,
+                    $cGap,
+                    $this->h - ($this->tMargin + $this->bMargin),
+                    'F'
+                );
+            }
+        }
+
+        // Draw lines and labels
+        $this->SetFillColor(255, 255, 255);
 
         // Draw rows
         foreach ($rows as $k => $row) {
@@ -269,15 +315,55 @@ class FPDFGridAreas extends \FPDF
             }
         }
 
+        // Grid areas and labels
+        $this->SetDrawColor(0, 0, 255);
+        $this->SetLineWidth(0.5);
+        foreach ($grid as $key => $item) {
+            $this->enableAlphaTransparency(true);
+            $this->Rect($item['x'], $item['y'], $item['w'], $item['h'], 'FD');
+            $this->enableAlphaTransparency(false);
+            $this->SetXY($item['x'] + 1, $item['y'] - $fontYOffset);
+            $this->Cell($this->GetStringWidth($key), $fontHeight, $key, 0, 0, 'L', true);
+        }
+
         // Reset current settings
         $this->SetFont($current['fontFamily'], $current['fontStyle'], $current['fontSize']);
         $this->SetLineWidth($current['lineWidth']);
+        $this->TextColor = $current['textColor'];
         $this->DrawColor = $current['drawColor'];
         $this->FillColor = $current['fillColor'];
+        $this->cMargin = $current['cMargin'];
         if ($this->page > 0) {
+            $this->_out($current['textColor']); // output current text colour
             $this->_out($current['drawColor']); // output current draw colour
             $this->_out($current['fillColor']); // output current fill colour
         }
+        $this->SetXY($this->lMargin, $this->tMargin); // reset coords to content origin
+    }
+
+    /**
+     * Enable alpha transparency
+     *
+     * When enabled, applies to whole document until disabled.
+     *
+     * @param boolean $alpha Enable the alpha transparency (default = `false`).
+     *                       - `true` sets fill alpha to 0.5 (50% opacity)
+     *                       - `false` restores fill alpha to 1 (100% opacity/opaque)
+     *
+     * @return void
+     */
+    protected function enableAlphaTransparency(bool $alpha = false): void
+    {
+        // ca = non-stroking (fill), CA = stroking (lines/text), BA = blend mode
+        if ($alpha) {
+            $this->alphaTransparency[1] = ['ca' => 0.5, 'CA' => 1, 'BM' => '/Normal'];
+            $this->_out(sprintf('/AlphaTransparency%d gs', 1));
+        } else {
+            $this->alphaTransparency[2] = ['ca' => 1, 'CA' => 1, 'BM' => '/Normal'];
+            $this->_out(sprintf('/AlphaTransparency%d gs', 2));
+        }
+
+        $this->PDFVersion = '1.4'; // using alpha transparency
     }
 
     /**
@@ -309,5 +395,50 @@ class FPDFGridAreas extends \FPDF
 
         // Everything is ok, do calculation
         return  floatval(($pc / 100) * $total);
+    }
+
+    /**
+     * Overwrite FPDF parent resource dictionary method
+     * @phpcs:disable PSR2.Methods.MethodDeclaration.Underscore
+     * @return void
+     */
+    protected function _putresourcedict(): void
+    {
+        parent::_putresourcedict(); // call parent first
+
+        $this->_put('/ExtGState <<');
+        foreach ($this->alphaTransparency as $key => $level) {
+            $this->_put('/AlphaTransparency' . $key . ' ' . $level['n'] . ' 0 R');
+        }
+        $this->_put('>>');
+    }
+
+    /**
+     * Overwrite FPDF parent resources method
+     * @phpcs:disable PSR2.Methods.MethodDeclaration.Underscore
+     * @return void
+     */
+    protected function _putresources(): void
+    {
+        foreach ($this->alphaTransparency as $key => $level) {
+            $this->_newobj();
+            $this->alphaTransparency[$key]['n'] = $this->n; // store object number
+            $this->_put('<</Type /ExtGState');
+            $this->_put(sprintf('/ca %.3F', $level['ca']));
+            $this->_put(sprintf('/CA %.3F', $level['CA']));
+            $this->_put('/BM ' . $level['BM']);
+            $this->_put('>>');
+            $this->_put('endobj');
+        }
+
+        parent::_putresources(); // now call parent
+    }
+
+    /**
+     * @deprecated Deprecated, use `setGrid()` instead. Will be removed in future versions.
+     */
+    public function grid($rows, $cols, $grid, $rGap = 0, $cGap = 0)
+    {
+        return $this->setGrid($rows, $cols, $grid, [$rGap, $cGap]);
     }
 }
