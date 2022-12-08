@@ -5,7 +5,7 @@
  * (c) LMD, 2022
  * https://github.com/lmd-code/fpdf-grid-areas
  *
- * @version 0.3.2
+ * @version 1.0.0
  */
 
 declare(strict_types=1);
