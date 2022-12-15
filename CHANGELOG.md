@@ -1,5 +1,16 @@
 # Changelog
 
+## [v1.0.1] - 2022-12-15
+
+### Changed:
+
+- Updated/rewrote demo examples.
+
+### Fixed
+
+- Bugfix: Line widths set by `drawGridLines()` are now correctly sized when the user set unit is not 'mm'.
+- Bugfix: Decimal (float) grid row/column values less than `1` (e.g. `0.5`), no longer incorrectly treated as a flexible row/column.
+
 ## [v1.0.0] - 2022-12-08
 
 First major release.
@@ -53,6 +64,7 @@ First major release.
 
 First working version.
 
+[v1.0.1]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v1.0.1
 [v1.0.0]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v1.0.0
 [v0.3.2]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v0.3.2
 [v0.3.1]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v0.3.1

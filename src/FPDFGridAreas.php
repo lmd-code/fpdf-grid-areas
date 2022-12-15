@@ -5,7 +5,7 @@
  * (c) LMD, 2022
  * https://github.com/lmd-code/fpdf-grid-areas
  *
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 declare(strict_types=1);
@@ -132,7 +132,7 @@ class FPDFGridAreas extends \FPDF
             $sizes[$i] = self::percentToFloat($sizes[$i], $contentHeight);
         }
 
-        $numFlex = count(array_filter($sizes, fn($val) => intval($val) === 0));
+        $numFlex = count(array_filter($sizes, fn($val) => strval($val) === '0'));
         $definedHeight = array_sum($sizes);
         $flexHeight = ($pageHeight - ($definedHeight + $gapTotal)) / $numFlex;
 
@@ -168,7 +168,7 @@ class FPDFGridAreas extends \FPDF
             $sizes[$i] = self::percentToFloat($sizes[$i], $contentWidth);
         }
 
-        $numFlex = count(array_filter($sizes, fn($val) => intval($val) === 0));
+        $numFlex = count(array_filter($sizes, fn($val) => strval($val) === '0'));
         $definedWidth = array_sum($sizes);
         $flexWidth = ($pageWidth - ($definedWidth + $gapTotal)) / $numFlex;
 
@@ -213,8 +213,8 @@ class FPDFGridAreas extends \FPDF
         // Set temporary settings
         $this->SetFont('Courier', 'B', $fontSize);
         $this->SetTextColor(100, 100, 100);
-        $this->SetDrawColor(255, 0, 0);
-        $this->SetLineWidth(0.1);
+        $this->SetDrawColor(225, 0, 0);
+        $this->SetLineWidth($this->mmToUserUnit(0.1));
         $this->cMargin = 0;
 
         $numRows = count($rows);
@@ -226,7 +226,7 @@ class FPDFGridAreas extends \FPDF
 
         $fontYOffset = $fontHeight / 2; // vertial centre of text
         $fontXOffset = $fontWidth / 2; // horizontal centre of text
-        $edgeOffset = 1; // offset text from edge of page (mm)
+        $edgeOffset = $this->mmToUserUnit(1); // offset text from edge of page (mm)
 
         $rGapOffset = ($rGap > 0) ? $rGap / 2 : 0; // centre of row gap
         $cGapOffset = ($cGap > 0) ? $cGap / 2 : 0; // centre of column gap
@@ -316,13 +316,13 @@ class FPDFGridAreas extends \FPDF
         }
 
         // Grid areas and labels
-        $this->SetDrawColor(0, 0, 255);
-        $this->SetLineWidth(0.5);
+        $this->SetDrawColor(0, 0, 225);
+        $this->SetLineWidth($this->mmToUserUnit(0.5));
         foreach ($grid as $key => $item) {
             $this->enableAlphaTransparency(true);
             $this->Rect($item['x'], $item['y'], $item['w'], $item['h'], 'FD');
             $this->enableAlphaTransparency(false);
-            $this->SetXY($item['x'] + 1, $item['y'] - $fontYOffset);
+            $this->SetXY($item['x'] + $edgeOffset, $item['y'] - $fontYOffset);
             $this->Cell($this->GetStringWidth($key), $fontHeight, $key, 0, 0, 'L', true);
         }
 
@@ -367,12 +367,42 @@ class FPDFGridAreas extends \FPDF
     }
 
     /**
+     * Convert millimetres to user unit
+     *
+     * User unit inferred from scale factor (`$this->k`).
+     * - pt = 1
+     * - mm = 2.8346456692913
+     * - cm = 28.346456692913
+     * - in = 72
+     *
+     * @param float|int $val value in mm
+     *
+     * @return float
+     */
+    private function mmToUserUnit(float|int $val): float
+    {
+        switch (intval(floor($this->k))) {
+            case 1: // pt
+                return $val * (72 / 25.4);
+            case 28: // cm
+                return $val / 10;
+            case 72: // in
+                return $val / 25.4;
+            case 2: // mm (default)
+            default: // not defined (edge case)
+                return $val;
+                break;
+        }
+    }
+
+    /**
      * Convert percentage to float
      *
      * @param float|int|string $val Value to convert
      * @param float|int $total Total value percentage is proportional to
      *
      * @return float
+     * @throws \InvalidArgumentException
      */
     private static function percentToFloat(float|int|string $val, float|int $total): float
     {
