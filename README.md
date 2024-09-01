@@ -5,6 +5,7 @@ If you are familiar with CSS Grid, then you are familiar with FPDF Grid Areas. T
 ## Requirements
 
 - **FPDF Library:** The `FPDFGridAreas` class is an extension to the [FPDF Library](http://www.fpdf.org/) PDF generator, which you will also need to download (it's free, in all senses of the word).
+    - *Latest version checked:* FPDF v1.86
 - **PHP Version:** Compatible with PHP versions 8.0+
 
 ## Methods
