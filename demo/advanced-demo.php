@@ -117,7 +117,7 @@ $content = [
 
 // Draw optional borders around page area content.
 // We don't add it to Cell() itself, in case the content isn't the full width/height
-// pf the grid area container.
+// of the grid area container.
 $drawBorders = function ($borders, $area, $pdf) {
     if (is_string($borders)) {
         $letters = str_split(strtolower($borders));
@@ -192,7 +192,7 @@ foreach ($content[$pdf->PageNo()] as $gridKey => $gridContent) {
 $pdf->AddPage();
 
 // Using the previously set grid, the coordinates will always apply to the current page.
-// Also remember, the helper grid lines will not show this time.
+// Also remember the helper grid lines will not show this time.
 foreach ($content[$pdf->PageNo()] as $gridKey => $gridContent) {
     $area = $grid1[$gridKey];
 
@@ -215,13 +215,13 @@ $pdf->AddPage('L'); // Change in page orientation
 $grid2 = $pdf->setGrid(
     [20, 0, 10],
     [50, 0, 50],
-    [
-        'area1' => [1, 1, 2, 2],
-        'area2' => [1, 2, 2, 4],
-        'area3' => [2, 1, 3, 2],
-        'area4' => [2, 2, 3, 3],
-        'area5' => [2, 3, 3, 4],
-        'area6' => [3, 1, 4, 4],
+    [   // Using CSS style grid definitions
+        'area1' => '1 / 1 / 2 / 2',
+        'area2' => '1 / 2 / 2 / 4',
+        'area3' => '2 / 1 / 3 / 2',
+        'area4' => '2 / 2 / 3 / 3',
+        'area5' => '2 / 3 / 3 / 4',
+        'area6' => '3 / 1 / 4 / 4',
     ],
     0, // no gaps on this grid
 );

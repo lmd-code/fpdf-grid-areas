@@ -52,11 +52,13 @@ class FPDFGridAreas extends \FPDF
      *
      * @param mixed[] $rows Row sizes in user units (int/float) or percentage (string)
      * @param mixed[] $cols Column sizes in user units (int/float) or percentage (string)
-     * @param array<string, int[]> $grid Array of grid area definitions in the format:
-     *                                   `'name' => 'row start, col start, row end, col end',`
-     *                                   E.g., `'area1' => [1, 1, 2, 3],`
+     * @param array<string, string|int[]> $grid Array of grid area definitions as key/value pairs consisting of
+     *                                          'area name'/'area definition' (row start, col start, row end, col end).
+     *                                          Values can be a CSS grid string or an array of integers.
+     *                                          - CSS grid string: `'area name' => '1 / 1 / 2 / 3'`
+     *                                          - Array of integers: `'area name' => [1, 1, 2, 3]`
      * @param mixed $gap Row/Column gap in user units (int/float) or percentage (string).
-     *                   - Single value (int/float/atring) for equal row/column gaps (`5`)
+     *                   - Single value (int/float/string) for equal row/column gaps (`5`)
      *                   - An array of values (as above) for different row/column gaps (`[5, 10]`)
      *
      * @return array
@@ -80,6 +82,9 @@ class FPDFGridAreas extends \FPDF
         $gridItems = [];
 
         foreach ($grid as $key => $val) {
+            if (is_string($val)) {
+                $val = self::gridStringToArray($val);
+            }
             $r1 = $val[0] - 1;
             $c1 = $val[1] - 1;
             $r2 = $val[2] - 1;
@@ -224,7 +229,7 @@ class FPDFGridAreas extends \FPDF
         $fontHeight = $this->FontSize; // font size in user unit
         $fontWidth = ($this->CurrentFont['cw']['0'] * ($fontHeight / 1000)) * strlen('' . $numRows);
 
-        $fontYOffset = $fontHeight / 2; // vertial centre of text
+        $fontYOffset = $fontHeight / 2; // vertical centre of text
         $fontXOffset = $fontWidth / 2; // horizontal centre of text
         $edgeOffset = $this->mmToUserUnit(1); // offset text from edge of page (mm)
 
@@ -411,7 +416,7 @@ class FPDFGridAreas extends \FPDF
             return floatval($val); // force int to float
         }
 
-        // Is value a vald percentage string (e.g., '50%', '100%' or '33.33%')
+        // Is value a valid percentage string (e.g., '50%', '100%' or '33.33%')
         if (preg_match('/^\d{1,3}(\.\d+)?%$/', $val) !== 1) {
             throw new \InvalidArgumentException(__METHOD__ . ': argument must be a valid percentage string. ' . $val);
         }
@@ -425,6 +430,29 @@ class FPDFGridAreas extends \FPDF
 
         // Everything is ok, do calculation
         return  floatval(($pc / 100) * $total);
+    }
+
+    /**
+     * Convert grid definition string to an array
+     *
+     * Converts a CSS grid-like string definition to an array of integers
+     *
+     * @param string $gridDef String grid definition in format `1 / 1 / 2 / 3` (spaces optional)
+     *
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    private static function gridStringToArray(string $gridDef): array
+    {
+        // Value must be in valid format
+        if (preg_match('/^\d+(?:\s*?\/\s*?\d+){3}$/', trim($gridDef)) !== 1) {
+            throw new \InvalidArgumentException(
+                __METHOD__ . ': argument must contain four values separated by a forward slash (space optional): '
+                . 'e.g., 1 / 1 / 2 / 3'
+            );
+        }
+        $grid = explode('/', trim(str_replace(' ', '', $gridDef)));
+        return array_map('intval', $grid); // ensure values are integers
     }
 
     /**

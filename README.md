@@ -70,7 +70,14 @@ Row/column sizes. An array of values specified as:-
 
 Grid area definition.
 
-An array of named areas, where each area (array key) is specified by an array of integers representing the edges of each area in the order: row start, column start, row end, column end. See [Defining a Grid](#defining-a-grid) for more detail.
+An array of named areas, where each area (array key) is specified by integers representing the edges of each area in the order: row start, column start, row end, column end. 
+
+The grid areas can be specified using CSS grid syntax (string) or an array of integers.
+
+- CSS grid syntax: `'1 / 1 / 2 / 3'`
+- Array of integers: `[1, 1, 2, 3]`
+
+See [Defining a Grid](#defining-a-grid) for more detail.
 
 You can pass an empty array (`$grid = []`) in conjunction with `setShowGridLines()` to view the lines numbers (see [Show Grid Lines Helper](#show-grid-lines-helper)).
 
@@ -131,13 +138,15 @@ S  3 +----+----+
    4 +----+----+
 ```
 
-This means that an area that is 1 row high and 2 columns wide placed at the top of the grid would be defined by the array `'areaName' => [1, 1, 2, 3]` (in CSS it's `#areaName { grid-area: 1 / 1 / 2 / 3; }`).
+This means that an area that is 1 row high and 2 columns wide placed at the top of the grid would be defined in CSS as `#areaName { grid-area: 1 / 1 / 2 / 3; }`.
+
+It is possible to pass the grid area values as a CSS grid string, or as an array of integers.
 
 ```php
 // 'area name' => [row start, column start, row end, column end],
 $grid = [
-    'area1' => [1, 1, 2, 2],
-    'area2' => [2, 1, 3, 2],
+    'area1' => '1 / 1 / 2 / 2', // CSS grid syntax (spaces optional)
+    'area2' => [2, 1, 3, 2], // array of integers
     //... etc
 ]
 ```
@@ -169,7 +178,7 @@ $pdf->setGrid(
         'area1' => [1, 1, 2, 3], // grid-area: 1 / 1 / 2 / 3;
         'area2' => [2, 1, 3, 2],
         'area3' => [2, 2, 3, 3],
-        'area4' => [3, 1, 4, 3],
+        'area4' => '3 / 1 / 4 / 3', // or we can actually use a CSS grid-like string
     ],
     [5, 10], // grid-row-gap: 5mm; /  grid-column-gap: 10mm;
 );

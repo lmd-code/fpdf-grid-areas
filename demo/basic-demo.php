@@ -30,7 +30,7 @@ $pdf->setShowGridLines(true);
 $pdf->AddPage();
 
 // Define the grid axis and grid areas (using user units in this example).
-// If grid lines ar eenable, you must add a page before defining a grid.
+// If grid lines are enabled, you must add a page before defining a grid.
 $grid = $pdf->setGrid(
     [15, 0, 10], // rows
     [0, 50], // cols
@@ -38,7 +38,7 @@ $grid = $pdf->setGrid(
         'head' => [1, 1, 2, 3],
         'main' => [2, 1, 3, 2],
         'side' => [2, 2, 3, 3],
-        'foot' => [3, 1, 4, 3],
+        'foot' => '3 / 1 / 4 / 3', // Using the CSS string style as an example
     ],
     [5, 10] // row, col gaps
 );

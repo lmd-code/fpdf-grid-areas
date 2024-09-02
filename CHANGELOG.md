@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.1.0] - 2024-09-02
+
+### Changed
+
+- Change `$grid` array argument in `setGrid()` to allow use of CSS grid syntax string or an array of integers for grid area definitions.
+- Update README to document `setGrid()` argument change.
+- Update demo code.
+
 ## [v1.0.1] - 2022-12-15
 
 ### Changed:
@@ -64,6 +72,7 @@ First major release.
 
 First working version.
 
+[v1.1.0]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v1.1.0
 [v1.0.1]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v1.0.1
 [v1.0.0]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v1.0.0
 [v0.3.2]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v0.3.2
