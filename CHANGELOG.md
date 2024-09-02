@@ -6,7 +6,7 @@
 
 - Change `$grid` array argument in `setGrid()` to allow use of CSS grid syntax string or an array of integers for grid area definitions.
 - Update README to document `setGrid()` argument change.
-- Update demo code.
+- Update demo code with examples of CSS grid syntax.
 
 ## [v1.0.1] - 2022-12-15
 
