@@ -1,5 +1,11 @@
 # Changelog
 
+## [v1.1.1] - 2024-10-08
+
+### Added
+
+- Added `composer.json` files.
+
 ## [v1.1.0] - 2024-09-02
 
 ### Changed
@@ -72,6 +78,7 @@ First major release.
 
 First working version.
 
+[v1.1.1]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v1.1.1
 [v1.1.0]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v1.1.0
 [v1.0.1]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v1.0.1
 [v1.0.0]: https://github.com/lmd-code/fpdf-grid-areas/releases/tag/v1.0.0
