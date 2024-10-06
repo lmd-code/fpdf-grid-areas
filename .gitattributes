@@ -5,10 +5,14 @@
 .gitkeep       linguist-generated
 CHANGELOG.md   linguist-generated
 phpcs.xml      linguist-generated
+*.json         linguist-generated
+*.lock         linguist-generated
 
 # Exclude from language stats
 *.md      linguist-vendored
 *.txt     linguist-vendored
+*.json    linguist-vendored
+*.lock    linguist-vendored
 phpcs.xml linguist-vendored
 
 # Exclude files from exporting
@@ -17,3 +21,4 @@ phpcs.xml linguist-vendored
 .gitignore     export-ignore
 .gitkeep       export-ignore
 phpcs.xml      export-ignore
+*.lock         export-ignore
